@@ -1,6 +1,8 @@
 import React from 'react'
 import QuestionsTable from '../components/questions/questions-table'
 import { AddQuestionDialog } from '../components/questions/add-question-dialog'
+import { ButtonGroup } from '@material-tailwind/react'
+import { AddQuestionImageDialog } from '../components/questions/add-question-image-dialog'
 
 export default function Questions() {
   return (
@@ -10,7 +12,10 @@ export default function Questions() {
           <h2 className=' text-2xl font-bold'>Savollar</h2>
         </div>
         <div>
-          <AddQuestionDialog />
+          <ButtonGroup>
+            <AddQuestionDialog />
+            <AddQuestionImageDialog/>
+          </ButtonGroup>
         </div>
       </div>
       <QuestionsTable />

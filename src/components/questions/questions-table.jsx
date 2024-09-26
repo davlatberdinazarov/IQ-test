@@ -7,6 +7,7 @@ import Loading from '../../lib/Loading';
 import { useParams } from 'react-router-dom';
 import { EditQuestionDialog } from './edit-question-dialog';
 import DeleteQuestionDialog from './delete-question-dialog';
+import { EditQuestionImageDialog } from './edit-question-image-dialog';
 
 export default function QuestionsTable() {
     const [page, setPage] = useState(1);
@@ -50,7 +51,7 @@ export default function QuestionsTable() {
                 </div>
             ),
             sortable: true,
-            width: "200px",
+            width: "330px",
         },
         {
             name: "Correct Answer",
@@ -87,31 +88,15 @@ export default function QuestionsTable() {
             },
         },
         {
-            name: "AdditiveAnswer",
-            selector: (row) => {
-                return row.additiveAnswer ? (
-                    <div>{
-                        row.additiveAnswer.length > 0 ? (
-                            row.additiveAnswer.map(item => {
-                                return <span className='mx-2 font-bold' key={item}>
-                                    {item}
-                                </span>;
-                            })
-                        ) : (
-                            <span className='mx-2 font-bold'>No Additive Answer</span>
-                        )
-                    }</div>
-                ) : (
-                    <div>Image Question</div>
-                );
-            },
-            width: "180px",
-        },
-        {
             name: "Amallar",
             selector: (row) => (
                 <div className="flex">
-                    <EditQuestionDialog data={row} />
+                    { row.questionType == "TEST" ? (
+                        <EditQuestionDialog data={row} />
+                    ) : (
+                        <EditQuestionImageDialog data={row} />
+                    ) }
+                    
                     <DeleteQuestionDialog id={row.id} />
                 </div>
             ),

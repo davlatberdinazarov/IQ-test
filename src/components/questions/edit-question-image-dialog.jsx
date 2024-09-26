@@ -15,54 +15,37 @@ import { $api } from "../../utils/api";
 import { MainLayoutContext } from "../../layouts/MainLayout";
 import { FaPlus, FaMinus, FaPencilAlt } from "react-icons/fa";
 
-export function EditQuestionDialog({ data }) {
+export function EditQuestionImageDialog({ data }) {
     console.log(data);
     const [open, setOpen] = useState(false);
     const [questionValue, setQuestionValue] = useState(data.questionValue); // Savol texti
-    const [answers, setAnswers] = useState(data.additiveData || []); // Fallback to an empty array if undefined
     const [correctAnswer, setCorrectAnswer] = useState(data.correctAnswer); // To'g'ri javob
     const { setColRender } = useContext(MainLayoutContext);
+    const [file, setFile] = useState(null);
 
     const tabData = [
         {
-            label: "Test",
-            value: "test"
+            label: "Image",
+            value: "image"
         }
     ];
 
     const handleOpen = () => setOpen(!open);
 
-    // Javob qo'shish funksiyasi
-    const addAnswerInput = () => {
-        setAnswers([...answers, ""]); // Yangi bo'sh input qo'shish
+    const handleFileChange = (e) => {
+        setFile(e.target.files[0]);
     };
 
-    // Javobni olib tashlash funksiyasi
-    const removeAnswerInput = (index) => {
-        const updatedAnswers = answers.filter((_, i) => i !== index);
-        setAnswers(updatedAnswers);
-    };
-
-    // Javobni o'zgartirish funksiyasi
-    const handleAnswerChange = (e, index) => {
-        const updatedAnswers = [...answers];
-        updatedAnswers[index] = e.target.value;
-        setAnswers(updatedAnswers);
-    };
-
-    const handleAddTest = async (e) => {
+    const handleAddImage = async (e) => {
         e.preventDefault();
 
         const formData = new FormData();
-        formData.append('questionValue', questionValue);
+        // formData.append('questionValue', questionValue);
         // formData.append('correctAnswer', correctAnswer);
-
-        answers.forEach(answer => {
-            formData.append('additiveAnswer', answer);
-        });
+        formData.append('file', file);
 
         try {
-            const response = await $api.put(`/question/update/${data.id}?correctAnswer=${correctAnswer}&questionType=TEST`, formData, {
+            const response = await $api.put(`/question/update/${data.id}?correctAnswer=${correctAnswer}&questionType=IMAGE&questionValue=${questionValue}`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
@@ -75,8 +58,8 @@ export function EditQuestionDialog({ data }) {
 
                 // clear fields
                 // setQuestionValue('');
-                // setAnswers(['']);
                 // setCorrectAnswer('');
+                // setFile(null);
             }
         } catch (error) {
             setOpen(false);
@@ -88,7 +71,7 @@ export function EditQuestionDialog({ data }) {
     return (
         <>
             <IconButton onClick={handleOpen} variant="text">
-                <FaPencilAlt className="h-4 w-4 text-green-500" />
+                <FaPencilAlt className="h-4 w-4 text-red-500" />
             </IconButton>
             <Dialog
                 size="sm"
@@ -100,7 +83,7 @@ export function EditQuestionDialog({ data }) {
                 }}
             >
                 <div className="bg-white p-4 rounded-lg max-h-[700px] overflow-y-auto">
-                    <Tabs value='test'>
+                    <Tabs value='image'>
                         <TabsHeader className="gap-4 min-w-48">
                             {tabData.map(({ label, value }) => (
                                 <Tab className="text-left" key={value} value={value}>
@@ -109,9 +92,9 @@ export function EditQuestionDialog({ data }) {
                             ))}
                         </TabsHeader>
                         <TabsBody>
-                            <TabPanel value='test'>
-                                <form className="flex flex-col gap-3" onSubmit={handleAddTest}>
-                                    <h2 className="font-bold text-center text-green-600">Testli savol qo'shish</h2>
+                            <TabPanel value='image'>
+                                <form className="flex flex-col gap-3" onSubmit={handleAddImage}>
+                                    <h2 className="font-bold text-center text-red-600">Rasmli savol qo'shish</h2>
                                     <Input
                                         label="Savol"
                                         type="text"
@@ -119,35 +102,47 @@ export function EditQuestionDialog({ data }) {
                                         value={questionValue}
                                         onChange={(e) => setQuestionValue(e.target.value)}
                                     />
-                                    <h2 className="text-black font-semibold">Javob qo'shish</h2>
-                                    {answers?.map((answer, index) => (
-                                        <div key={index} className="flex items-center gap-3">
-                                            <Input
-                                                label={`Javob ${index + 1}`}
-                                                type="text"
-                                                placeholder={`Javob ${index + 1}`}
-                                                value={answer}
-                                                onChange={(e) => handleAnswerChange(e, index)}
+                                    <div>
+                                        <div
+                                            className="flex items-center rounded-sm my-2 w-64 h-32 gap-3"
+                                        >
+                                            <img
+                                                className="w-full h-full object-cover rounded shadow-md"
+                                                src={`http://158.220.111.34:8086/api/v1/user/getFiles/${data.imgUrl}`}
+                                                alt={data.name}
                                             />
-                                            {answers.length > 1 && (
-                                                <Button
-                                                    type="button"
-                                                    className="bg-red-500 text-white hover:bg-red-700"
-                                                    onClick={() => removeAnswerInput(index)}
-                                                >
-                                                    <FaMinus />
-                                                </Button>
-                                            )}
                                         </div>
-                                    ))}
-
-                                    <Button
-                                        type="button"
-                                        className="bg-green-500 flex items-center gap-2 text-white hover:bg-green-700"
-                                        onClick={addAnswerInput}
-                                    >
-                                        <FaPlus className="text-lg" /> Javob qo'shish
-                                    </Button>
+                                        <div className="my-2">
+                                            <label
+                                                htmlFor="file-upload"
+                                                className="cursor-pointer max-w-[150px] flex items-center justify-center px-2 py-1 bg-gray-100 mt-4 hover:bg-gray-300 rounded-md shadow-md text-gray-700"
+                                            >
+                                                {" "}
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    className="h-6 w-6 mr-2"
+                                                    fill="none"
+                                                    viewBox="0 0 24 24"
+                                                    stroke="currentColor"
+                                                >
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth="2"
+                                                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                                                    />
+                                                </svg>
+                                                <span>Rasm tanlang</span>
+                                                <input
+                                                    id="file-upload"
+                                                    type="file"
+                                                    value={file}
+                                                    className=" sr-only"
+                                                    onChange={handleFileChange}
+                                                />
+                                            </label>
+                                        </div>
+                                    </div>
                                     <Input
                                         label="To'g'ri javob"
                                         type="text"
